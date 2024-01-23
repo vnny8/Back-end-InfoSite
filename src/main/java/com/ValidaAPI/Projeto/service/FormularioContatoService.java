@@ -13,6 +13,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import com.ValidaAPI.Projeto.validacao.ValidacaoException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,33 +49,43 @@ public class FormularioContatoService {
         return formularioContatoRepo.findById(id);
     }
 
+    public String lerConteudoHTML(String caminho) throws IOException {
+        Path path = Paths.get(caminho);
+        byte[] fileBytes = Files.readAllBytes(path);
+        return new String(fileBytes, StandardCharsets.UTF_8);
+    }
+
     public void cadastrar(CadastroFormularioContatoDto dto){
         try {
-//            SimpleMailMessage mensagemCliente = new SimpleMailMessage();
-//            SimpleMailMessage mensagemInfo = new SimpleMailMessage();
-//            mensagemInfo.setFrom("juancassemirotestes@gmail.com");
-//            mensagemInfo.setTo("juancassemirotestes@gmail.com");
-//            mensagemInfo.setSubject("Mensagem de Contato: "+dto.nome());
-//            mensagemInfo.setText("Nome: "+dto.nome()+"\nE-mail: "+dto.email()+"\nMensagem: "+dto.assunto());
-//            mensagemCliente.setFrom("juancassemirotestes@gmail.com");
-//            mensagemCliente.setTo(dto.email());
-//            mensagemCliente.setSubject(dto.nome() +" - Recebemos sua mensagem!");
-//            mensagemCliente.setText("<h2>Olá "+dto.nome()+"</h2>, nós recebemos sua mensagem e nossa equipe entrará em contato para verificar sua solicitação!");
-//
-//            emailSender.send(mensagemInfo);
-//            emailSender.send(mensagemCliente);
+            MimeMessage emailCliente = emailSender.createMimeMessage();
+            MimeMessage emailInterno = emailSender.createMimeMessage();
 
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message,true,"UTF-8");
-            String html = "<h2>Olá "+dto.nome()+",</h2> Recebemos sua mensagem!";
-            helper.setTo(dto.email());
-            helper.setSubject(dto.assunto());
-            helper.setText(html, true);
-            emailSender.send(message);
-        }catch(MessagingException e){
+            MimeMessageHelper helperCliente = new MimeMessageHelper(emailCliente,true,"UTF-8");
+            MimeMessageHelper helperInterno = new MimeMessageHelper(emailInterno,true,"UTF-8");
+
+            String htmlCliente = lerConteudoHTML("src/main/resources/static/MsgCliente.html");
+            String htmlInterno = lerConteudoHTML("src/main/resources/static/MsgInterna.html");
+
+            htmlCliente = htmlCliente.replace("{{nome}}",dto.nome());
+
+            htmlInterno = htmlInterno.replace("{{nome}}",dto.nome()).replace("{{email}}",dto.email()).replace("{{assunto}}",dto.assunto()).replace("{{telefone}}",dto.telefone());
+
+            helperCliente.setText(htmlCliente,true);
+            helperCliente.setTo(dto.email());
+            helperCliente.setSubject("Recebemos sua mensagem \uD83D\uDCE9");
+
+            helperInterno.setText(htmlInterno,true);
+            helperInterno.setTo("juancassemirotestes@gmail.com");
+            helperInterno.setSubject("Mensagem recebida do site");
+
+            emailSender.send(emailCliente);
+            emailSender.send(emailInterno);
+
+        }catch(MessagingException | IOException e){
             throw new ValidacaoException(e.getMessage());
 
-        }finally{
+        }
+        finally{
             formularioContatoRepo.save(new FormularioContato(dto));
         }
 
