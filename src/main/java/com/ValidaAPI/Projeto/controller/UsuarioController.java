@@ -1,7 +1,8 @@
 package com.ValidaAPI.Projeto.controller;
 
-import com.ValidaAPI.Projeto.DAO.IUsuario;
+import com.ValidaAPI.Projeto.repository.IUsuario;
 import com.ValidaAPI.Projeto.model.Usuario;
+import com.ValidaAPI.Projeto.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,31 +20,34 @@ public class UsuarioController {
     @Autowired
     private IUsuario DAO;
 
+    private UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService){
+        this.usuarioService = usuarioService;
+    }
+
     @GetMapping
     public ResponseEntity<List<Usuario>> listaUsuarios(){
-        List<Usuario> lista = (List<Usuario>) DAO.findAll();
-        return ResponseEntity.status(200).body(lista);
+        return ResponseEntity.status(200).body(usuarioService.listarUsuarios());
     }
 
     public List<Usuario> usuariosCadastrados(){
-        return (List<Usuario>) DAO.findAll();
+        return usuarioService.listarUsuarios();
     }
 
     @PostMapping
     public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario cadastro){
-        Usuario novoUsuario = DAO.save(cadastro);
-        return ResponseEntity.status(201).body(novoUsuario);
+        return ResponseEntity.status(201).body(usuarioService.criarUsuario(cadastro));
     }
 
     @PutMapping
     public ResponseEntity<Usuario> editarUsuario(@RequestBody Usuario cadastroEditado){
-        Usuario novoUsuario = DAO.save(cadastroEditado);
-        return ResponseEntity.status(201).body(novoUsuario);
+        return ResponseEntity.status(200).body(usuarioService.editarUsuario(cadastroEditado));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> excluirUsuario(@PathVariable Integer id){
-        DAO.deleteById(id);
+        usuarioService.excluirUsuario(id);
         return ResponseEntity.status(204).build();
     }
 
