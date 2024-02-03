@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.ValidaAPI.Projeto.service.FormularioContatoService;
-import com.ValidaAPI.Projeto.validacao.ValidacaoException;
 
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class FormularioContatoController {
         try {
             formularioContatoService.cadastrar(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body("Formulário cadastrado com sucesso");
-        }catch (ValidacaoException exception){
+        }catch (RuntimeException exception){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
         }
     }
@@ -52,7 +51,7 @@ public class FormularioContatoController {
         try{
             formularioContatoService.deletarPorId(id);
             return ResponseEntity.status(HttpStatus.OK).body("Deletado com sucesso!");
-        }catch(ValidacaoException exception){
+        }catch(RuntimeException exception){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
         }
     }

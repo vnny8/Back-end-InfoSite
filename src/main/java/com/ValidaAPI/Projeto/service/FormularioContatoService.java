@@ -6,12 +6,9 @@ import com.ValidaAPI.Projeto.repository.FormularioContatoRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import com.ValidaAPI.Projeto.validacao.ValidacaoException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -82,7 +79,7 @@ public class FormularioContatoService {
             emailSender.send(emailInterno);
 
         }catch(MessagingException | IOException e){
-            throw new ValidacaoException(e.getMessage());
+            throw new RuntimeException(e);
 
         }
         finally{
@@ -93,7 +90,7 @@ public class FormularioContatoService {
 
     public void deletarPorId(Long id){
         if(!formularioContatoRepo.existsById(id)){
-            throw new ValidacaoException("Formulário não encontrado com o id informado");
+            throw new RuntimeException("Formulário não encontrado com o id informado");
         }
         formularioContatoRepo.deleteById(id);
     }

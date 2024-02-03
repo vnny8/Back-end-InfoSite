@@ -12,37 +12,11 @@ import java.time.Instant;
 @Entity
 @Table(name="formulario_contato")
 public class FormularioContato {
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAssunto() {
-        return assunto;
-    }
-
-    public Instant getDataEnvio() {
-        return dataEnvio;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
     private String email;
-
-    public String getTelefone() {
-        return telefone;
-    }
-
     private String telefone;
     @Column(columnDefinition = "TEXT")
     private String assunto;
@@ -62,6 +36,6 @@ public class FormularioContato {
 
     @Override
     public String toString(){
-        return "id: "+this.id+" nome: "+this.nome+" email: "+this.email+" assunto: "+this.assunto+" dataEnvio: "+this.dataEnvio;
+        return "id: "+" nome: "+this.nome+" email: "+this.email+" assunto: "+this.assunto+" dataEnvio: "+this.dataEnvio;
     }
 }

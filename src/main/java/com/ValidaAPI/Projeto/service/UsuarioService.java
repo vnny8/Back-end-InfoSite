@@ -1,7 +1,11 @@
 package com.ValidaAPI.Projeto.service;
 
+import com.ValidaAPI.Projeto.dto.CadastroUsuarioDto;
+import com.ValidaAPI.Projeto.dto.UsuarioDto;
 import com.ValidaAPI.Projeto.model.Usuario;
-import com.ValidaAPI.Projeto.repository.IUsuario;
+import com.ValidaAPI.Projeto.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,9 +13,13 @@ import java.util.List;
 @Service
 public class UsuarioService {
 
-    private IUsuario repository;
+    @Autowired
+    private UsuarioRepository repository;
 
-    public UsuarioService(IUsuario repository){
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UsuarioRepository repository){
         this.repository = repository;
     }
 
@@ -20,17 +28,26 @@ public class UsuarioService {
         return lista;
     }
 
-    public Usuario criarUsuario(Usuario cadastro){
-        Usuario novoUsuario = repository.save(cadastro);
-        return novoUsuario;
+    public UsuarioDto criarUsuario(CadastroUsuarioDto usuario){
+        String senhaCodificada = passwordEncoder.encode(usuario.senha());
+        Usuario novoUsuario = repository.save(new Usuario(usuario.nome(), usuario.login(), senhaCodificada));
+        return new UsuarioDto(novoUsuario);
+
     }
 
-    public Usuario editarUsuario(Usuario usuario){
-        Usuario usuarionovo = repository.save(usuario);
-        return usuarionovo;
+    public UsuarioDto editarUsuario(UsuarioDto usuario,Long id){
+        Usuario usuarioExistente = repository.findById(id).orElseThrow(()->new RuntimeException("Usuário não encontrado!"));
+        if(repository.existsByLogin(usuario.nome())){
+            throw new RuntimeException("Já existe um usuário com este login");
+        }
+        String senhaCodificada = passwordEncoder.encode(usuario.senha());
+        usuarioExistente.setNome(usuario.nome());
+        usuarioExistente.setLogin(usuario.login());
+        usuarioExistente.setSenha(senhaCodificada);
+        return new UsuarioDto(repository.save(usuarioExistente));
     }
 
-    public Boolean excluirUsuario(Integer id){
+    public Boolean excluirUsuario(Long id){
         repository.deleteById(id);
         return true;
     }

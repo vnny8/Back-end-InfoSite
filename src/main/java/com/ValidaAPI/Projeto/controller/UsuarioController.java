@@ -1,8 +1,11 @@
 package com.ValidaAPI.Projeto.controller;
 
-import com.ValidaAPI.Projeto.repository.IUsuario;
+import com.ValidaAPI.Projeto.dto.CadastroUsuarioDto;
+import com.ValidaAPI.Projeto.dto.UsuarioDto;
+import com.ValidaAPI.Projeto.repository.UsuarioRepository;
 import com.ValidaAPI.Projeto.model.Usuario;
 import com.ValidaAPI.Projeto.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +21,7 @@ import java.util.Optional;
 public class UsuarioController {
 
     @Autowired
-    private IUsuario DAO;
-
+    private UsuarioRepository usuarioRepository;
     private UsuarioService usuarioService;
 
     public UsuarioController(UsuarioService usuarioService){
@@ -31,40 +33,36 @@ public class UsuarioController {
         return ResponseEntity.status(200).body(usuarioService.listarUsuarios());
     }
 
-    public List<Usuario> usuariosCadastrados(){
-        return usuarioService.listarUsuarios();
-    }
-
     @PostMapping
-    public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario cadastro){
+    public ResponseEntity<UsuarioDto> criarUsuario(@RequestBody @Valid CadastroUsuarioDto cadastro){
         return ResponseEntity.status(201).body(usuarioService.criarUsuario(cadastro));
     }
 
-    @PutMapping
-    public ResponseEntity<Usuario> editarUsuario(@RequestBody Usuario cadastroEditado){
-        return ResponseEntity.status(200).body(usuarioService.editarUsuario(cadastroEditado));
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioDto> editarUsuario(@RequestBody UsuarioDto cadastroEditado,@PathVariable Long id){
+        return ResponseEntity.status(200).body(usuarioService.editarUsuario(cadastroEditado,id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> excluirUsuario(@PathVariable Integer id){
+    public ResponseEntity<?> excluirUsuario(@PathVariable Long id){
         usuarioService.excluirUsuario(id);
         return ResponseEntity.status(204).build();
     }
 
     @GetMapping("/{id}")
-    public Optional<Usuario> encontrarUsuario(@PathVariable Integer id){
-        Optional<Usuario> encontrarUsuario = DAO.findById(id);
+    public Optional<Usuario> encontrarUsuario(@PathVariable Long id){
+        Optional<Usuario> encontrarUsuario = usuarioRepository.findById(id);
         return encontrarUsuario;
     }
 
-    @GetMapping("/login/{login}/{senha}")
-    public Integer encontrarUsuarioNome(@PathVariable String login, @PathVariable String senha){
-        List<Usuario> usuarios = usuariosCadastrados();
-        for (Usuario usuario : usuarios){
-            if (usuario.getLogin().equals(login) && usuario.getSenha().equals(senha)) {
-                return 1;
-            }
-        }
-        return 0;
-    }
+//    @GetMapping("/login/{login}/{senha}")
+//    public Integer encontrarUsuarioNome(@PathVariable String login, @PathVariable String senha){
+//        List<Usuario> usuarios = usuariosCadastrados();
+//        for (Usuario usuario : usuarios){
+//            if (usuario.getLogin().equals(login) && usuario.getSenha().equals(senha)) {
+//                return 1;
+//            }
+//        }
+//        return 0;
+//    }
 }
