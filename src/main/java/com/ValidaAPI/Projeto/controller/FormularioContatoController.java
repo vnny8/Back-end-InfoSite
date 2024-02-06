@@ -7,10 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import com.ValidaAPI.Projeto.service.FormularioContatoService;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController
@@ -38,9 +41,9 @@ public class FormularioContatoController {
     public ResponseEntity<String> cadastrar(@RequestBody @Valid CadastroFormularioContatoDto dto){
         try {
             formularioContatoService.cadastrar(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Formulário cadastrado com sucesso");
-        }catch (RuntimeException exception){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getMessage());
+            return ResponseEntity.ok("Requisição de envio feita com sucesso!");
+        }catch (RuntimeException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 

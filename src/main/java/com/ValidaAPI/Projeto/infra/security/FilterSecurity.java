@@ -1,6 +1,7 @@
 package com.ValidaAPI.Projeto.infra.security;
 
 import com.ValidaAPI.Projeto.repository.UsuarioRepository;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,10 +28,14 @@ public class FilterSecurity extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String tokenJWT = recuperaToken(request);
         if(tokenJWT != null){
-            String subject = tokenService.getSubject(tokenJWT);
-            UserDetails usuario = usuarioRepository.findByLogin(subject);
-            var authentication = new UsernamePasswordAuthenticationToken(usuario,null,usuario.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                String subject = tokenService.getSubject(tokenJWT);
+                UserDetails usuario = usuarioRepository.findByLogin(subject);
+                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }catch(JWTVerificationException e){
+                throw new JWTVerificationException("Token Expirado ou Inválido!");
+            }
         }
         filterChain.doFilter(request,response);
     }

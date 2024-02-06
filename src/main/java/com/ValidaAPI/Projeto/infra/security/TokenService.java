@@ -5,6 +5,7 @@ import com.ValidaAPI.Projeto.model.Usuario;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +32,6 @@ public class TokenService {
         }
     }
     public String getSubject(String tokenJWT){
-        try{
             Algorithm algoritmo = Algorithm.HMAC256(secret);
             return JWT.require(algoritmo)
                     .withIssuer("API Infocorp.site")
@@ -39,9 +39,7 @@ public class TokenService {
                     .verify(tokenJWT)
                     .getSubject();
 
-        }catch(JWTCreationException e){
-            throw new RuntimeException("Token JWT Inválido ou Expirado");
-        }
+
     }
 
     private Instant dataExpiracao() {

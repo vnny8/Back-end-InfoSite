@@ -1,13 +1,17 @@
 package com.ValidaAPI.Projeto.service;
 import com.ValidaAPI.Projeto.dto.CadastroFormularioContatoDto;
 import com.ValidaAPI.Projeto.dto.FormularioContatoDto;
+import com.ValidaAPI.Projeto.model.Enviado;
 import com.ValidaAPI.Projeto.model.FormularioContato;
 import com.ValidaAPI.Projeto.repository.FormularioContatoRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,8 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Service
 public class FormularioContatoService {
@@ -25,7 +31,10 @@ public class FormularioContatoService {
     private FormularioContatoRepository formularioContatoRepo;
 
     @Autowired
-    private JavaMailSender emailSender;
+    private EmailService emailService;
+
+
+
     public List<FormularioContatoDto> listar(){
         List<FormularioContato> formulariosContato = formularioContatoRepo.findAll();
         return formulariosContato
@@ -42,49 +51,21 @@ public class FormularioContatoService {
                 .toList();
     }
 
-    public Optional<FormularioContato> listarPorId(Long id){
-        return formularioContatoRepo.findById(id);
-    }
 
-    public String lerConteudoHTML(String caminho) throws IOException {
-        Path path = Paths.get(caminho);
-        byte[] fileBytes = Files.readAllBytes(path);
-        return new String(fileBytes, StandardCharsets.UTF_8);
-    }
 
-    public void cadastrar(CadastroFormularioContatoDto dto){
+
+    public boolean cadastrar(CadastroFormularioContatoDto dto){
         try {
-            MimeMessage emailCliente = emailSender.createMimeMessage();
-            MimeMessage emailInterno = emailSender.createMimeMessage();
-
-            MimeMessageHelper helperCliente = new MimeMessageHelper(emailCliente,true,"UTF-8");
-            MimeMessageHelper helperInterno = new MimeMessageHelper(emailInterno,true,"UTF-8");
-
-            String htmlCliente = lerConteudoHTML("src/main/resources/static/MsgCliente.html");
-            String htmlInterno = lerConteudoHTML("src/main/resources/static/MsgInterna.html");
-
-            htmlCliente = htmlCliente.replace("{{nome}}",dto.nome());
-
-            htmlInterno = htmlInterno.replace("{{nome}}",dto.nome()).replace("{{email}}",dto.email()).replace("{{assunto}}",dto.assunto()).replace("{{telefone}}",dto.telefone());
-
-            helperCliente.setText(htmlCliente,true);
-            helperCliente.setTo(dto.email());
-            helperCliente.setSubject("Recebemos sua mensagem \uD83D\uDCE9");
-
-            helperInterno.setText(htmlInterno,true);
-            helperInterno.setTo("juancassemirotestes@gmail.com");
-            helperInterno.setSubject("Mensagem recebida do site");
-
-            emailSender.send(emailCliente);
-            emailSender.send(emailInterno);
-
-        }catch(MessagingException | IOException e){
-            throw new RuntimeException(e);
-
+            emailService.enviarEmails(dto);
+            CadastroFormularioContatoDto formularioNovo = new CadastroFormularioContatoDto(dto.nome(),dto.email(),dto.telefone(),dto.assunto(),Enviado.EXITO);
+            formularioContatoRepo.save(new FormularioContato(formularioNovo));
+        }catch (MailException | IOException | MessagingException e) {
+            CadastroFormularioContatoDto formularioNovo = new CadastroFormularioContatoDto(dto.nome(),dto.email(),dto.telefone(),dto.assunto(),Enviado.FALHA);
+            formularioContatoRepo.save(new FormularioContato(formularioNovo));
+            return false;
         }
-        finally{
-            formularioContatoRepo.save(new FormularioContato(dto));
-        }
+
+        return true;
 
     }
 
@@ -95,5 +76,27 @@ public class FormularioContatoService {
         formularioContatoRepo.deleteById(id);
     }
 
+    @Scheduled(fixedDelay = 60000) // 600000 milissegundos = 1 minuto
+    public void enviarEmailsPendentesAgendado() throws MessagingException, IOException {
+        List<FormularioContato> emailsPendentes = formularioContatoRepo.findPendentes();
 
+        if (!emailsPendentes.isEmpty()) {
+            for (FormularioContato email : emailsPendentes) {
+                try {
+                    emailService.enviarEmails(new CadastroFormularioContatoDto(email.getNome(), email.getEmail(), email.getTelefone(), email.getAssunto(), email.getEnviado()));
+                    FormularioContato formulario = new FormularioContato(email.getId(), email.getNome(), email.getEmail(), email.getTelefone(), email.getAssunto(), Enviado.EXITO, email.getDataEnvio(), email.getTentativasEnvio());
+                    formularioContatoRepo.save(formulario);
+                    break;
+                } catch (Exception e) {
+                    if (email.getTentativasEnvio() >= 3) {
+                        formularioContatoRepo.delete(email);
+                    } else {
+                        email.setTentativasEnvio(email.getTentativasEnvio() + 1);
+                        formularioContatoRepo.save(email);
+                    }
+                }
+            }
+
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package com.ValidaAPI.Projeto.dto;
 
+import com.ValidaAPI.Projeto.model.Enviado;
 import jakarta.validation.constraints.NotNull;
 
 public record CadastroFormularioContatoDto(
@@ -10,5 +11,8 @@ public record CadastroFormularioContatoDto(
         @NotNull
         String telefone,
         @NotNull
-        String assunto) {
+        String assunto,
+        @NotNull
+        Enviado enviado
+) {
 }
