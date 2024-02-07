@@ -31,7 +31,8 @@ public class AutenticacaoController{
             var authentication =  manager.authenticate(AuthenticationToken);
 
             var tokenJWT = tokenService.gerarToken((Usuario)authentication.getPrincipal());
-            return ResponseEntity.ok(new TokenDto(tokenJWT));
+            Usuario usuario = (Usuario)authentication.getPrincipal();
+            return ResponseEntity.ok(new TokenDto(tokenJWT,usuario.getNome(),usuario.getImagem()));
 
     }
 

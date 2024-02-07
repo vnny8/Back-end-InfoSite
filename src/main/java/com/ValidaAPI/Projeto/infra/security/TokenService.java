@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 
 @Service
@@ -25,6 +27,8 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("API Infocorp.site")
                     .withSubject(usuario.getLogin())
+                    .withClaim("nome", usuario.getNome())
+                    .withClaim("imagem", Collections.singletonList(usuario.getImagem()))
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);
         }catch(JWTCreationException e){

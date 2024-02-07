@@ -41,6 +41,9 @@ public class Usuario  implements UserDetails {
         this.senha = senha;
         this.imagem = imagem;
     }
+    public Usuario(){
+
+    }
 
 
     @Override
