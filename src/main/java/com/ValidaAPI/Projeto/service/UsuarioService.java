@@ -19,10 +19,6 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository repository){
-        this.repository = repository;
-    }
-
     public List<Usuario> listarUsuarios(){
         List<Usuario> lista = repository.findAll();
         return lista;
@@ -30,7 +26,7 @@ public class UsuarioService {
 
     public UsuarioDto criarUsuario(CadastroUsuarioDto usuario){
         String senhaCodificada = passwordEncoder.encode(usuario.senha());
-        Usuario novoUsuario = repository.save(new Usuario(usuario.nome(), usuario.login(), senhaCodificada));
+        Usuario novoUsuario = repository.save(new Usuario(usuario.nome(), usuario.login(), senhaCodificada,usuario.imagem()));
         return new UsuarioDto(novoUsuario);
 
     }
@@ -44,11 +40,11 @@ public class UsuarioService {
         usuarioExistente.setNome(usuario.nome());
         usuarioExistente.setLogin(usuario.login());
         usuarioExistente.setSenha(senhaCodificada);
+        usuarioExistente.setImagem(usuario.imagem());
         return new UsuarioDto(repository.save(usuarioExistente));
     }
 
-    public Boolean excluirUsuario(Long id){
+    public void excluirUsuario(Long id){
         repository.deleteById(id);
-        return true;
     }
 }

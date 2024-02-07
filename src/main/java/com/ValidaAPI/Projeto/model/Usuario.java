@@ -1,5 +1,6 @@
 package com.ValidaAPI.Projeto.model;
 
+import com.ValidaAPI.Projeto.dto.CadastroUsuarioDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,15 +32,16 @@ public class Usuario  implements UserDetails {
     @Column(name = "senha", nullable = true)
     private String senha;
 
-    public Usuario(String nome, String login, String senha) {
+    @Column(name="imagem")
+    private byte[] imagem;
+
+    public Usuario(String nome, String login, String senha,byte[] imagem) {
         this.nome = nome;
         this.login = login;
         this.senha = senha;
+        this.imagem = imagem;
     }
 
-    public Usuario() {
-
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

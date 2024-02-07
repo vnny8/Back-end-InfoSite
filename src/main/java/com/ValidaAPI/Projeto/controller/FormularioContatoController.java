@@ -17,7 +17,7 @@ import java.util.Objects;
 
 
 @RestController
-@RequestMapping("/contato")
+@RequestMapping("api/contato")
 public class FormularioContatoController {
 
     @Autowired

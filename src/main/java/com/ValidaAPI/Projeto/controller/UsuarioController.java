@@ -7,21 +7,25 @@ import com.ValidaAPI.Projeto.model.Usuario;
 import com.ValidaAPI.Projeto.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/usuarios")
+@RequestMapping("api/usuarios")
 // Endereço de acesso geral, ai não precisa colocar no GetMapping, exceto se for mais específico
 
 public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
     private UsuarioService usuarioService;
 
     public UsuarioController(UsuarioService usuarioService){
@@ -30,17 +34,28 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity<List<Usuario>> listaUsuarios(){
+
         return ResponseEntity.status(200).body(usuarioService.listarUsuarios());
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDto> criarUsuario(@RequestBody @Valid CadastroUsuarioDto cadastro){
-        return ResponseEntity.status(201).body(usuarioService.criarUsuario(cadastro));
+    public ResponseEntity criarUsuario(@RequestBody @Valid CadastroUsuarioDto cadastro, UriComponentsBuilder uriBuilder){
+        try {
+            UsuarioDto cadastroNovo = usuarioService.criarUsuario(cadastro);
+            URI uri = uriBuilder.path("/api/usuarios/{id}").buildAndExpand(cadastroNovo.id()).toUri();
+            return ResponseEntity.created(uri).body(cadastroNovo);
+        }catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Não foi possível cadastrar o usuário!");
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDto> editarUsuario(@RequestBody UsuarioDto cadastroEditado,@PathVariable Long id){
-        return ResponseEntity.status(200).body(usuarioService.editarUsuario(cadastroEditado,id));
+    public ResponseEntity editarUsuario(@RequestBody UsuarioDto cadastroEditado,@PathVariable Long id){
+        try {
+            return ResponseEntity.status(200).body(usuarioService.editarUsuario(cadastroEditado, id));
+        }catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -51,8 +66,7 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public Optional<Usuario> encontrarUsuario(@PathVariable Long id){
-        Optional<Usuario> encontrarUsuario = usuarioRepository.findById(id);
-        return encontrarUsuario;
+        return usuarioRepository.findById(id);
     }
 
 //    @GetMapping("/login/{login}/{senha}")
