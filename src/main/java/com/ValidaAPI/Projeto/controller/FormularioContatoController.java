@@ -17,6 +17,7 @@ import java.util.Objects;
 
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("api/contato")
 public class FormularioContatoController {
 
