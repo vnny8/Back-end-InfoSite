@@ -38,7 +38,7 @@ public class ProjetoService {
             projeto.setDescricao(projetoEditado.descricao());
             projeto.setImagem(projetoEditado.imagem());
             projetoRepository.save(projeto);
-            return  projetoEditado;
+            return new ProjetoDto(projeto);
         }
         else throw new RuntimeException("Não foi encontrado nenhum projeto com o id informado!");
     }

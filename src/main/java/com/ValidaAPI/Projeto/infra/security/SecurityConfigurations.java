@@ -29,6 +29,7 @@ public class SecurityConfigurations {
                         .authorizeHttpRequests(req -> {
                             req.requestMatchers("/login").permitAll();
                             req.requestMatchers(HttpMethod.POST,"/api/contato").permitAll();
+                            req.requestMatchers("/api/projetos").permitAll();
                             req.anyRequest().authenticated();
                         })
                         .addFilterBefore(filterSecurity, UsernamePasswordAuthenticationFilter.class)

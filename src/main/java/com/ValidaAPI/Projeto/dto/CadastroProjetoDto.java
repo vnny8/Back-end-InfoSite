@@ -6,4 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public record CadastroProjetoDto(@NotNull String titulo,
                                  @NotNull String descricao,
-                                 @NotNull byte[] imagem) {}
+                                 @NotNull byte[] imagem,
+                                 @NotNull String link,
+                                 @NotNull boolean ativo
+) {}
