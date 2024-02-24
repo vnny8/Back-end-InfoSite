@@ -32,6 +32,7 @@ public class SecurityConfigurations {
                             req.requestMatchers("/api/projetos").permitAll();
                             req.anyRequest().authenticated();
                         })
+                        .cors(AbstractHttpConfigurer::disable)
                         .addFilterBefore(filterSecurity, UsernamePasswordAuthenticationFilter.class)
                         .build();
     }
