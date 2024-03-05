@@ -25,6 +25,7 @@ public class EmailService {
     private String emailInfo;
 
     public void enviarEmails(CadastroFormularioContatoDto dto) throws MessagingException, IOException {
+        try {
             MimeMessage emailCliente = emailSender.createMimeMessage();
             MimeMessage emailInterno = emailSender.createMimeMessage();
 
@@ -49,6 +50,9 @@ public class EmailService {
 
             emailSender.send(emailCliente);
             emailSender.send(emailInterno);
+        }catch(RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
 
     }
 

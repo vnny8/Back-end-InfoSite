@@ -41,8 +41,11 @@ public class FormularioContatoController {
     @Transactional
     public ResponseEntity<String> cadastrar(@RequestBody @Valid CadastroFormularioContatoDto dto){
         try {
-            formularioContatoService.cadastrar(dto);
-            return ResponseEntity.ok("Requisição de envio feita com sucesso!");
+            if(formularioContatoService.cadastrar(dto)){
+                return ResponseEntity.ok("Requisição de envio feita com sucesso!");
+            }else{
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body("Formulário salvo no banco mas não foi possível enviar o e-mail");
+            }
         }catch (RuntimeException e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

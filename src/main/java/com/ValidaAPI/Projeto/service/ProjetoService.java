@@ -36,6 +36,8 @@ public class ProjetoService {
             Projeto projeto = projetoRepository.findById(id).get();
             projeto.setTitulo(projetoEditado.titulo());
             projeto.setDescricao(projetoEditado.descricao());
+            projeto.setAtivo(projetoEditado.ativo());
+            projeto.setLink(projetoEditado.link());
             projeto.setImagem(projetoEditado.imagem());
             projetoRepository.save(projeto);
             return new ProjetoDto(projeto);
