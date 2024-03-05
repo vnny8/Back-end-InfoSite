@@ -36,8 +36,9 @@
   <ul>
     <li>GET<code>api/projetos</code>: Lista todos os projetos registrados</li>
     <li>GET<code>api/projetos/{id}</code>: Busca um projeto pelo id</li>
-    <li>POST<code>api/projetos</code>: Cadastra um projeto no banco de dados. O JSON enviado deve coonter os seguintes campos: (titulo,descricao,imagem)</li>
+    <li>POST<code>api/projetos</code>: Cadastra um projeto no banco de dados. O JSON enviado deve conter os seguintes campos: (titulo,descricao,imagem,link,ativo). Sendo que o campo ativo é um booleano(Verdadeiro ou Falso)</li>
     <li>PUT<code>api/projetos/{id}</code>: Edita o projeto com id passado, deve ser enviado no corpo da requisição os mesmos campos do cadastro</li>
     <li>DEL<code>api/projetos/{id}</code>: Exclui do banco de dados o projeto de id enviado</li>
   </ul>
+  <p>Observação: Os campos de imagem devem ser enviados como um Array de Bits para o correto armazenamento no banco de dados</p>
 </p>
