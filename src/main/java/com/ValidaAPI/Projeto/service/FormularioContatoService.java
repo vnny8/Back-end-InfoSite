@@ -33,8 +33,6 @@ public class FormularioContatoService {
     @Autowired
     private EmailService emailService;
 
-
-
     public List<FormularioContatoDto> listar(){
         List<FormularioContato> formulariosContato = formularioContatoRepo.findAll();
         return formulariosContato
@@ -86,7 +84,6 @@ public class FormularioContatoService {
                     emailService.enviarEmails(new CadastroFormularioContatoDto(email.getNome(), email.getEmail(), email.getTelefone(), email.getAssunto(), email.getEnviado()));
                     FormularioContato formulario = new FormularioContato(email.getId(), email.getNome(), email.getEmail(), email.getTelefone(), email.getAssunto(), Enviado.EXITO, email.getDataEnvio(), email.getTentativasEnvio());
                     formularioContatoRepo.save(formulario);
-                    break;
                 } catch (Exception e) {
                     if (email.getTentativasEnvio() >= 3) {
                         formularioContatoRepo.delete(email);
@@ -96,7 +93,6 @@ public class FormularioContatoService {
                     }
                 }
             }
-
         }
     }
 }

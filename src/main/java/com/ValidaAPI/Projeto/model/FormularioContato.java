@@ -25,10 +25,6 @@ public class FormularioContato {
     private Enviado enviado;
     private Integer tentativasEnvio;
 
-    public FormularioContato(){
-
-    };
-
     public FormularioContato(CadastroFormularioContatoDto dto) {
         this.nome = dto.nome();
         this.email = dto.email().toLowerCase();
